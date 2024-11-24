@@ -10,7 +10,7 @@ def main():
     add_category_parser.add_argument("name", type=str, help="Categoty name")
     add_category_parser.add_argument("datatype", type=str, help="Datatype of category")
     
-    view_categories = subparsers.add_parser("view-categories")
+    view_categories_parser = subparsers.add_parser("view-categories")
     
     add_expense_parser = subparsers.add_parser("add-expense")
     add_expense_parser.add_argument("name", type=str, help="Description of expence")

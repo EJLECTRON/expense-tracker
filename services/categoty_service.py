@@ -2,8 +2,8 @@
 
 
 def add_category(name: str, datatype: str):
-    pass
+    print("add_category")
 
 
 def view_categories():
-    pass
+    print("All categories listed here")
