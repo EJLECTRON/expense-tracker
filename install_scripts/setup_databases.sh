@@ -7,7 +7,11 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR" || exit
 
-source ./styles.sh
+# Define MySQL root credentials
+MYSQL_USER="root"
+MYSQL_PASS=""
+SQL_FILE="set_up_database.sql"
 
+mysql -u "$MYSQL_USER" -p "$MYSQL_PASS" < "$SQL_FILE"
 
 success "Databases created successfully."

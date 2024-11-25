@@ -6,9 +6,6 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR" || exit
 
-source ./styles.sh
-
-
 bash setup_mysql.sh
 bash setup_databases.sh
 

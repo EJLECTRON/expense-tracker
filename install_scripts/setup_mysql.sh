@@ -12,7 +12,7 @@ source ./styles.sh
 
 info_text_is_mysql="MySQL is installed already on your system, proceed to setting up databases..."
 info_text_is_not_mysql="MySQL not present."
-if type mysql >/dev/null 2>&1 
+if mysqld --version
 then
     info "$info_text_is_mysql"
 else
