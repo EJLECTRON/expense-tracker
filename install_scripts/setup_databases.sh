@@ -4,14 +4,20 @@
 #shellcheck source=/dev/null
 #shellcheck disable=SC2154
 
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR" || exit
 
-# Define MySQL root credentials
-MYSQL_USER="root"
-MYSQL_PASS=""
+source ./styles.sh
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "../database" || exit
+
 SQL_FILE="set_up_database.sql"
 
-mysql -u "$MYSQL_USER" -p "$MYSQL_PASS" < "$SQL_FILE"
-
-success "Databases created successfully."
+if sudo mariadb -u "root" -p "mysql"  < "$SQL_FILE"
+then
+    success "Databases created successfully."
+else
+    error "Databases didn't create successfully."
+fi
