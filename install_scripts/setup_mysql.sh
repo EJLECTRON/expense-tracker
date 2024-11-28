@@ -12,15 +12,14 @@ cd "$SCRIPT_DIR" || exit
 
 source ./styles.sh
 
-
-info_text_is_mysql="MySQL is installed already on your system, proceed to setting up databases..."
-info_text_is_not_mysql="MySQL not present."
+is_sql_installed=false
 
 if mysqld --version && mariadb --version
 then
-    info "$info_text_is_mysql"
+    info "MySQL is installed already on your system, proceed to setting up databases..."
+    is_sql_installed=true
 else
-    info "$info_text_is_not_mysql"
+    info "MySQL not present."
 
     # Install MariaDB
     pacman -Qi mariadb >/dev/null 2>&1 || sudo pacman -S mariadb
@@ -63,14 +62,17 @@ sudo systemctl enable mariadb
 handle_error "Failed to enable MariaDB service at startup."
 info "MariaDB service enabled at startup."
 
-# Secure MySQL installation
-sudo mysql_secure_installation
-handle_error "Failed to secure MySQL installation."
-info "MySQL installation secured."
+if [ "$is_sql_installed" = false ]
+then
+    # Secure MySQL installation
+    sudo mysql_secure_installation
+    handle_error "Failed to secure MySQL installation."
+    info "MySQL installation secured."
 
-# Secure MariaDB installation
-sudo mariadb-secure-installation
-handle_error "Failed to secure MariaDB installation."
-info "MariaDB installation secured."
+    # Secure MariaDB installation
+    sudo mariadb-secure-installation
+    handle_error "Failed to secure MariaDB installation."
+    info "MariaDB installation secured."
+fi
 
 success "MySQL successfully set up."
