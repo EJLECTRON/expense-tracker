@@ -1,4 +1,4 @@
-# expence-tracker
+# expense-tracker
 
 A simple expense tracking application that helps users manage their spending by categorizing expenses, filtering data, and generating reports. This project uses Python and MySQL as the database backend with SQLAlchemy as the ORM.
 
