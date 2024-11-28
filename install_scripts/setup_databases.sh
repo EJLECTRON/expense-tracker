@@ -10,9 +10,6 @@ cd "$SCRIPT_DIR" || exit
 
 source ./styles.sh
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-cd "../database" || exit
-
 SQL_FILE="set_up_database.sql"
 
 if sudo mariadb -u "root" -p < "$SQL_FILE"
