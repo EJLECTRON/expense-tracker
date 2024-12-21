@@ -13,9 +13,10 @@ def main():
     view_categories_parser = subparsers.add_parser("view-categories")
     
     add_expense_parser = subparsers.add_parser("add-expense")
-    add_expense_parser.add_argument("name", type=str, help="Description of expence")
+    add_expense_parser.add_argument("name", type=str, help="Header of expence")
     add_expense_parser.add_argument("amount", type=float, help="Expense amount")
     add_expense_parser.add_argument("category", type=str, help="Category name")
+    add_expense_parser.add_argument("description", type=str, help="Full description")
     
     view_expenses_parser = subparsers.add_parser("view-expenses")
     view_expenses_parser.add_argument("number", type=int, help="View last n expences")
@@ -28,7 +29,7 @@ def main():
     elif args.command == "view-categories":
         view_categories()
     elif args.command == "add-expense":
-        add_expense(args.amount, args.category)
+        add_expense(args.name, args.amount, args.category, args.description)
     elif args.command == "view-expences":
         view_expenses(args.number, args.category)
         
