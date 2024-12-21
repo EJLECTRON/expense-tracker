@@ -8,7 +8,6 @@ def main():
 
     add_category_parser = subparsers.add_parser("add-category")
     add_category_parser.add_argument("name", type=str, help="Categoty name")
-    add_category_parser.add_argument("datatype", type=str, help="Datatype of category")
     
     view_categories_parser = subparsers.add_parser("view-categories")
     
@@ -25,7 +24,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "add-category":
-        add_category(args.name, args.datatype)
+        add_category(args.name)
     elif args.command == "view-categories":
         view_categories()
     elif args.command == "add-expense":
