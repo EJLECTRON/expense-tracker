@@ -1,6 +1,6 @@
 import argparse
 from services.categoty_service import add_category, view_categories
-from services.expence_service import add_expense, view_expenses
+from services.expense_service import add_expense, view_expenses
 
 def main():
     parser = argparse.ArgumentParser(description="Expense Tracker CLI")
