@@ -10,6 +10,16 @@ cd "$SCRIPT_DIR" || exit
 
 source ./styles.sh
 
+SQL_FILE="set_up_user.sql"
+
+if sudo mariadb -u "root" -p < "$SQL_FILE"
+then
+    success "User created successfully."
+else
+    error "User didn't create successfully."
+fi
+
+
 SQL_FILE="set_up_database.sql"
 
 if sudo mariadb -u "root" -p < "$SQL_FILE"
