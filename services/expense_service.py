@@ -1,20 +1,22 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
-SQL_ROOT_PASSWORD = os.getenv('SQL_ROOT_PASSWORD')
+SQL_MYKOLA_PASSWORD = os.getenv('SQL_MYKOLA_PASSWORD')
 
-engine = create_engine(f"mysql+mysqlconnector://mykola:{SQL_ROOT_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci", echo=True)
+engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci', echo=True)
 
-def add_expense(name: str, datatype: str, amount: float) -> str:
+def add_expense(name: str, amount: float, category: str, description: str) -> str:
     with engine.connect() as connection:
-        query = f"INSERT INTO EXPENSES (A) VALUES ({name})"
+        query = text(f'INSERT INTO EXPENSES (TITLE, AMOUNT, TIME_OF_TRANSACTION, CATEGORY_NAME, DESCRIPTION) VALUES ("{name}", {amount}, "{datetime.now().strftime('%Y-%m-%d')}", "{category}", "{description}")')
         connection.execute(query)
+        connection.commit()
 
 
 def view_expenses(number=1, category="ENTERTAINMENT"):
     with engine.connect() as connection:
-        query = f"SELECT * FROM EXPENSES WHERE CATEGORY = {category} LIMIT {number}"
+        query = text(f'SELECT * FROM EXPENSES WHERE CATEGORY="{category}" LIMIT {number}')
         connection.execute(query)
