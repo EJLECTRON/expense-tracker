@@ -11,12 +11,13 @@ engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@loc
 
 def add_expense(name: str, amount: float, category: str, description: str) -> str:
     with engine.connect() as connection:
-        query = text(f'INSERT INTO EXPENSES (TITLE, AMOUNT, TIME_OF_TRANSACTION, CATEGORY_NAME, DESCRIPTION) VALUES ("{name}", {amount}, "{datetime.now().strftime('%Y-%m-%d')}", "{category}", "{description}")')
+        query = text(f'INSERT INTO EXPENSES (TITLE, AMOUNT, TIME_OF_TRANSACTION, CATEGORY, DESCRIPTION) VALUES ("{name}", {amount}, "{datetime.now().strftime('%Y-%m-%d')}", "{category}", "{description}")')
         connection.execute(query)
         connection.commit()
 
 
-def view_expenses(number=1, category="ENTERTAINMENT"):
+def view_expenses(number, category):
     with engine.connect() as connection:
-        query = text(f'SELECT * FROM EXPENSES WHERE CATEGORY="{category}" LIMIT {number}')
-        connection.execute(query)
+        query = text(f'SELECT * FROM EXPENSES WHERE CATEGORY=\'{category}\' LIMIT {number}')
+        output = connection.execute(query)
+        print(output.fetchall())
