@@ -20,9 +20,18 @@ class Category(Base):
     name = Column(String, primary_key=True)
 
 
+def view_categories():
+    print("All categories listed here:")
+    with engine.connect() as connection:
+        query = text('SELECT NAME FROM CATEGORIES')
+        output = connection.execute(query)
+        for el in output:
+            print(el[0])
+
+
 def add_category(name: str):
     with engine.connect() as connection:
-        query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES ({name.upper()})')
+        query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name.upper()}\')')
         connection.execute(query)
         connection.commit()
         print(f'Category {name.upper()} has been added successfully.')
@@ -48,10 +57,20 @@ def edit_category(initial_name: str, needed_name:str):
        
     view_categories()
 
-def view_categories():
-    print("All categories listed here:")
-    with engine.connect() as connection:
-        query = text('SELECT NAME FROM CATEGORIES')
-        output = connection.execute(query)
-        for el in output:
-            print(el[0])
+
+def delete_category(name: str):
+    """ Delete category """
+    session = Session()
+
+    try:
+        category = session.query(Category).filter_by(name=name).one()
+        session.delete(category)
+        session.commit()
+
+        print(f"Category {category.name} has been deleted successfully.")
+    except NoResultFound:
+        print("Category not found.")
+    finally:
+        session.close()
+       
+    view_categories()

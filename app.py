@@ -1,5 +1,5 @@
 import argparse
-from services.category_service import add_category, view_categories, edit_category
+from services.category_service import add_category, view_categories, edit_category, delete_category
 from services.expense_service import add_expense, view_expenses
 
 def main():
@@ -14,6 +14,9 @@ def main():
     edit_category_parser = subparsers.add_parser('edit-category')
     edit_category_parser.add_argument('initial_name', type=str, help='Categoty name you want to rename')
     edit_category_parser.add_argument('needed_name', type=str, help='Desired new name of category')
+    
+    delete_category_parser = subparsers.add_parser('delete-category')
+    delete_category_parser.add_argument('name', type=str, help='Name of the category to delete')
     
     add_expense_parser = subparsers.add_parser('add-expense')
     add_expense_parser.add_argument('name', type=str, help='Header of expence')
@@ -31,6 +34,8 @@ def main():
         add_category(args.name)
     elif args.command == 'view-categories':
         view_categories()
+    elif args.command == 'delete-category':
+        delete_category(args.name)
     elif args.command == 'edit-category':
         edit_category(args.initial_name, args.needed_name)
     elif args.command == 'add-expense':
