@@ -5,11 +5,11 @@ from services.expense_service import add_expense, view_expenses
 def main():
     parser = argparse.ArgumentParser(description='Expense Tracker CLI')
     subparsers = parser.add_subparsers(dest='command')
+    
+    view_categories_parser = subparsers.add_parser('view-categories')
 
     add_category_parser = subparsers.add_parser('add-category')
     add_category_parser.add_argument('name', type=str, help='Categoty name')
-    
-    view_categories_parser = subparsers.add_parser('view-categories')
     
     edit_category_parser = subparsers.add_parser('edit-category')
     edit_category_parser.add_argument('initial_name', type=str, help='Categoty name you want to rename')
