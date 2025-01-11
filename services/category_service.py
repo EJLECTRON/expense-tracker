@@ -28,20 +28,19 @@ def add_category(name: str):
         print(f'Category {name.upper()} has been added successfully.')
     view_categories()
 
+
 def edit_category(initial_name: str, needed_name:str):
     """ Edit name of the category """
     session = Session()
+
     try:
-        # Fetch the category
         category = session.query(Category).filter_by(name=initial_name).one()
-        
-        # Update the name
         category.name = needed_name
+
         session.commit()
-        
-        # Refresh the object to ensure it has the latest state
         session.refresh(category)
-        print(f"Updated category: {category.name}")
+
+        print(f"Category {category.name} has been updated successfully.")
     except NoResultFound:
         print("Category not found.")
     finally:
