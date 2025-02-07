@@ -22,6 +22,7 @@ class Category(Base):
 
 def view_categories():
     print("All categories listed here:")
+
     with engine.connect() as connection:
         query = text('SELECT NAME FROM CATEGORIES')
         output = connection.execute(query)
@@ -30,16 +31,20 @@ def view_categories():
 
 
 def add_category(name: str):
+    name = name.upper()
+
     with engine.connect() as connection:
-        query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name.upper()}\')')
+        query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name}\')')
         connection.execute(query)
         connection.commit()
-        print(f'Category {name.upper()} has been added successfully.')
+        print(f'Category {name} has been added successfully.')
+
     view_categories()
 
 
 def edit_category(initial_name: str, needed_name:str):
     """ Edit name of the category """
+    initial_name, needed_name = initial_name.upper(), needed_name.upper()
     session = Session()
 
     try:
@@ -54,12 +59,13 @@ def edit_category(initial_name: str, needed_name:str):
         print("Category not found.")
     finally:
         session.close()
-       
+
     view_categories()
 
 
 def delete_category(name: str):
     """ Delete category """
+    name = name.upper()
     session = Session()
 
     try:
@@ -72,5 +78,5 @@ def delete_category(name: str):
         print("Category not found.")
     finally:
         session.close()
-       
+
     view_categories()
