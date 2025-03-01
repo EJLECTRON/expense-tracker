@@ -80,3 +80,6 @@ def delete_category(name: str):
         session.close()
 
     view_categories()
+
+if __name__ == "__main__":
+    view_categories()
