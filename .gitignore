@@ -163,3 +163,4 @@ cython_debug/
 
 .vscode/
 create_req.py
+add_expenses.sh
