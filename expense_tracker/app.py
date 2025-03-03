@@ -33,7 +33,11 @@ def main():
 
 
     edit_expense_parser = subparsers.add_parser('edit-expense')
-
+    edit_expense_parser.add_argument("--id_to_edit", type=str, required=True, help="Id that represents record to edit")
+    edit_expense_parser.add_argument("--name", type=str, required=False, help="New name for the record")
+    edit_expense_parser.add_argument("--amount", type=float, required=False, help="New amount of the record")
+    edit_expense_parser.add_argument("--category", type=float, required=False, help="New category of the record")
+    edit_expense_parser.add_argument("--description", type=float, required=False, help="New description of the record")
 
     delete_expense_parser = subparsers.add_parser('delete-expense')
     delete_expense_parser.add_argument("--all", action="store_true", required=False, help="Option to delete all occurencies with given options. It is should be used only if you want to delete all records of certain category, time, etc.")
@@ -59,7 +63,7 @@ def main():
     elif args.command == 'view-expenses':
         view_expenses(amount=args.amount, category=args.category)
     elif args.command == 'edit-expense':
-        edit_expense()
+        edit_expense(searched_id=args.id_to_edit, title=args.name, amount=args.amount, category=args.category, description=args.description)
     elif args.command == 'delete-expense':
         delete_expense(id=args.id, name=args.name, amount=args.amount, time_of_transaction=args.time, category=args.category, description=args.description)
 

@@ -53,11 +53,38 @@ def view_expenses(**kwargs):
         output = connection.execute(query)
         print(output.fetchall())
 
+#TODO case when name is more than 1 word isn't counted
+def edit_expense(**kwargs):
+    """
+    Edit expense (search for a record available only using id)
+    Keyword arguments:
+        - searched_id (str, required): Id of the record to update.
+        - title (str, optional): New name of the record (default: (default: "")
+        - amount (positive float, optional): New amount of the record (default: 0.0)
+        - category (str, optional): New category of the record (default: "")
+        - description (str, optional): New description of the record (default: "")
+    """
+    query, is_any_key_params = 'UPDATE EXPENSES SET', False
 
-def edit_expense():
-    pass
+    for el in kwargs:
+        if kwargs[el] != None and el != "searched_id":
+            is_any_key_params = True
+            query += f' {el.upper()} = \'{kwargs[el]}\','
+
+    if is_any_key_params:
+        query = query[:-1]
+        query += f' WHERE ID = {kwargs["searched_id"]};'
+
+        with engine.connect() as connection:
+            query = text(query)
+            connection.execute(query)
+            connection.commit()
+        logging.info("Updated successfully.")
+    else:
+        logging.error("None parameters were given, try again.")
 
 
+#TODO case when name is more than 1 word isn't counted
 def delete_expense(**kwargs):
     """
     Keyword arguments:
@@ -76,8 +103,7 @@ def delete_expense(**kwargs):
         if kwargs[el] != None: # checks if element was given by user
             is_any_key_params = True
             try:
-                query = query + f' {el}={kwargs[el]}' # adds key param to query
-                query += " AND"
+                query += f' {el}={kwargs[el]} AND' # adds key param to query
             except NameError:
                 pass
 
@@ -88,6 +114,6 @@ def delete_expense(**kwargs):
             query = text(query)
             connection.execute(query)
             connection.commit()
-        print("Deleted successfully.")
+        logging.info("Deleted successfully.")
     else:
-        print("None parameters were given, try again.")
+        logging.error("None parameters were given, try again.")
