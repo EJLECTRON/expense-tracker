@@ -5,11 +5,16 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 
+from expense_tracker.services.logger import get_custom_logger
+
+
+logging = get_custom_logger()
+
 load_dotenv()
 
 SQL_MYKOLA_PASSWORD = os.getenv('SQL_MYKOLA_PASSWORD')
 
-engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci', echo=True)
+engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
 Session = sessionmaker(bind=engine)
 
 Base = declarative_base()
@@ -21,7 +26,7 @@ class Category(Base):
 
 
 def view_categories():
-    print("All categories listed here:")
+    logging.info("All categories listed here:")
 
     with engine.connect() as connection:
         query = text('SELECT NAME FROM CATEGORIES')
@@ -37,9 +42,7 @@ def add_category(name: str):
         query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name}\')')
         connection.execute(query)
         connection.commit()
-        print(f'Category {name} has been added successfully.')
-
-    view_categories()
+        logging.info(f'Category {name} has been added successfully.')
 
 
 def edit_category(initial_name: str, needed_name:str):
@@ -54,13 +57,11 @@ def edit_category(initial_name: str, needed_name:str):
         session.commit()
         session.refresh(category)
 
-        print(f"Category {category.name} has been updated successfully.")
+        logging.info(f"Category {category.name} has been updated successfully.")
     except NoResultFound:
-        print("Category not found.")
+        logging.error("Category not found.")
     finally:
         session.close()
-
-    view_categories()
 
 
 def delete_category(name: str):
@@ -73,13 +74,8 @@ def delete_category(name: str):
         session.delete(category)
         session.commit()
 
-        print(f"Category {category.name} has been deleted successfully.")
+        logging.info(f"Category {category.name} has been deleted successfully.")
     except NoResultFound:
-        print("Category not found.")
+        logging.error("Category not found.")
     finally:
         session.close()
-
-    view_categories()
-
-if __name__ == "__main__":
-    view_categories()

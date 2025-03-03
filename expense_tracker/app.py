@@ -28,8 +28,8 @@ def main():
     add_expense_parser.add_argument('--description', type=str, required=False, help='Full description')
 
     view_expenses_parser = subparsers.add_parser('view-expenses')
-    view_expenses_parser.add_argument('number', type=int, help='View last n expenses')
-    view_expenses_parser.add_argument('category', type=str, help='To discover all available categories use command: \n view categories')
+    view_expenses_parser.add_argument('--amount', type=int, required=True, help='View last n expenses')
+    view_expenses_parser.add_argument('--category', type=str, required=False, help='To discover all available categories use command: \n view categories')
 
 
     edit_expense_parser = subparsers.add_parser('edit-expense')
@@ -57,7 +57,7 @@ def main():
     elif args.command == 'add-expense':
         add_expense(name=args.name, amount=args.amount, category=args.category, description=args.description)
     elif args.command == 'view-expenses':
-        view_expenses(args.number, args.category)
+        view_expenses(amount=args.amount, category=args.category)
     elif args.command == 'edit-expense':
         edit_expense()
     elif args.command == 'delete-expense':
