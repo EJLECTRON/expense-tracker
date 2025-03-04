@@ -65,7 +65,7 @@ def main():
     elif args.command == 'edit-expense':
         edit_expense(searched_id=args.id_to_edit, title=args.name, amount=args.amount, category=args.category, description=args.description)
     elif args.command == 'delete-expense':
-        delete_expense(id=args.id, name=args.name, amount=args.amount, time_of_transaction=args.time, category=args.category, description=args.description)
+        delete_expense(id=args.id, title=args.name, amount=args.amount, time_of_transaction=args.time, category=args.category, description=args.description)
 
 
 if __name__ == '__main__':

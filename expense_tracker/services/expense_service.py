@@ -69,7 +69,10 @@ def edit_expense(**kwargs):
     for el in kwargs:
         if kwargs[el] != None and el != "searched_id":
             is_any_key_params = True
-            query += f' {el.upper()} = \'{kwargs[el]}\','
+            if type(kwargs[el] == str):
+                query += f' {el.upper()} = \'{kwargs[el]}\','
+            else:
+                query += f' {el.upper()} = {kwargs[el]},'
 
     if is_any_key_params:
         query = query[:-1]
@@ -89,7 +92,7 @@ def delete_expense(**kwargs):
     """
     Keyword arguments:
         - id (int, optional): Id of the record (default. (default: 0; non-existent value in database).
-        - name (str, optional): Name of the record/s (default. (default: "")
+        - title (str, optional): Name of the record/s (default. (default: "")
         - amount (positive float, optional): Amount of the record/s (default: 0.0)
         - time_of_transaction (str, optional): Time of the record/s (default: "")
         - category (str, optional): Category of the record/s (default: "")
@@ -97,13 +100,17 @@ def delete_expense(**kwargs):
     """
     query, is_any_key_params = "DELETE FROM EXPENSES WHERE", False
 
-    assert kwargs['amount'] > 0, "Input error: amount should be more than 0"
+    if kwargs['amount'] != None:
+        assert kwargs['amount'] > 0, "Input error: amount should be more than 0"
 
     for index, el in enumerate(kwargs):
         if kwargs[el] != None: # checks if element was given by user
             is_any_key_params = True
             try:
-                query += f' {el}={kwargs[el]} AND' # adds key param to query
+                if type(kwargs[el] == str):
+                    query += f' {el.upper()}=\'{kwargs[el]}\' AND' # adds key param to query
+                else:
+                    query += f' {el.upper()}={kwargs[el]} AND'
             except NameError:
                 pass
 
