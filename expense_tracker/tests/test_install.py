@@ -5,14 +5,15 @@ from dotenv import load_dotenv
 
 def test_install():
     subprocess.run(["/home/ejlectron/Programming/projects/expense-tracker/install_scripts/install.sh"], shell=True)
-        
+
     try:
         load_dotenv()
         SQL_MYKOLA_PASSWORD = os.getenv('SQL_MYKOLA_PASSWORD')
 
-        engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci', echo=True)
+        engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
     except Exception as e:
         print(f"Failed to connect: {e}")
+
     user_creation(engine)
     database_creation(engine)
 
@@ -35,6 +36,3 @@ def database_creation(engine):
         response[i] = response[i][0]
 
     assert 'EXPENSE_TRACKER' in response, "Database 'EXPENSE_TRACKER' should exist."
-
-if __name__ == "__main__":
-    test_install()

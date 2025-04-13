@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Anything related to shellcheck doesn't impact functionality of script. It is for vscode extension.
+# shellcheck source=/dev/null
+# shellcheck disable=SC2154
+# shellcheck disable=SC2024
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "$SCRIPT_DIR" || exit
+
+source ./styles.sh
+
+SQL_FILE="set_up_user.sql"
+
+if sudo mysql -u root -p < "$SQL_FILE"
+then
+    success "User created successfully."
+else
+    error "User wasn't created successfully."
+fi
+
+SQL_FILE="set_up_database.sql"
+
+if sudo mysql -u root -p < "$SQL_FILE"
+then
+    success "Databases created successfully."
+else
+    error "Databases weren't created successfully."
+fi
