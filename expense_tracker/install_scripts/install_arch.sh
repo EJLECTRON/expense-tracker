@@ -8,7 +8,7 @@ cd "$SCRIPT_DIR" || exit
 
 source ./styles.sh
 
-bash setup_mysql.sh
-bash setup_databases.sh
+bash setup_mysql_arch.sh
+bash setup_databases_arch.sh
 
 success "Installation succeed! Enjoy using expence tracker. You can contribute to my project on GitHub: https://github.com/EJLECTRON/expense-tracker"
