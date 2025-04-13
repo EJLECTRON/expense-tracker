@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 
 def test_install():
-    subprocess.run(["/home/ejlectron/Programming/projects/expense-tracker/install_scripts/install.sh"], shell=True)
+    subprocess.run(["/home/ejlectron/Programming/projects/expense-tracker/install_scripts/install_arch.sh"], shell=True)
 
     try:
         load_dotenv()
