@@ -2,8 +2,8 @@ import pytest, os, subprocess
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
-from expense_tracker.services.category_service import *
-from expense_tracker.services.expense_service import *
+from expense_tracker.services.category_service import view_categories, add_category, edit_category, delete_category
+from expense_tracker.services.expense_service import view_expenses, add_expense, edit_expense, delete_expense
 
 
 

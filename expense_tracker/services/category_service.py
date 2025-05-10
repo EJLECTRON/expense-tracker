@@ -20,7 +20,7 @@ Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 
-class Category(Base):
+class Category:
     __tablename__ = 'CATEGORIES'
     name = Column(String, primary_key=True)
 
@@ -36,25 +36,18 @@ def view_categories():
         session.close()
 
 
-# def add_category(name: str):
-#     name = name.upper()
-
-#     with engine.connect() as connection:
-#         query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name}\')')
-#         connection.execute(query)
-#         connection.commit()
-#         logging.info(f'Category {name} has been added successfully.')
-
-
 def add_category(name: str):
     name = name.upper()
     session = Session()
     try:
         exists = session.query(Category).filter_by(name=name).first()
         if not exists:
-            new_category = Category(name=name)
+            new_category = Category()
+            new_category.name = Column(name, primary_key=True)
+
             session.add(new_category)
             session.commit()
+
             logging.info(f'Category {name} has been added successfully.')
         else:
             logging.info(f'Category {name} already exists. Skipping insert.')
@@ -69,7 +62,7 @@ def edit_category(initial_name: str, needed_name:str):
 
     try:
         category = session.query(Category).filter_by(name=initial_name).one()
-        category.name = needed_name
+        category.name = Column(needed_name, primary_key=True)
 
         session.commit()
         session.refresh(category)
