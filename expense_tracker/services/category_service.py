@@ -27,22 +27,39 @@ class Category(Base):
 
 def view_categories():
     logging.info("All categories listed here:")
+    session = Session()
+    try:
+        categories = session.query(Category).all()
+        for category in categories:
+            print(category.name)
+    finally:
+        session.close()
 
-    with engine.connect() as connection:
-        query = text('SELECT NAME FROM CATEGORIES')
-        output = connection.execute(query)
-        for el in output:
-            print(el[0])
+
+# def add_category(name: str):
+#     name = name.upper()
+
+#     with engine.connect() as connection:
+#         query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name}\')')
+#         connection.execute(query)
+#         connection.commit()
+#         logging.info(f'Category {name} has been added successfully.')
 
 
 def add_category(name: str):
     name = name.upper()
-
-    with engine.connect() as connection:
-        query = text(f'INSERT IGNORE INTO CATEGORIES (NAME) VALUES (\'{name}\')')
-        connection.execute(query)
-        connection.commit()
-        logging.info(f'Category {name} has been added successfully.')
+    session = Session()
+    try:
+        exists = session.query(Category).filter_by(name=name).first()
+        if not exists:
+            new_category = Category(name=name)
+            session.add(new_category)
+            session.commit()
+            logging.info(f'Category {name} has been added successfully.')
+        else:
+            logging.info(f'Category {name} already exists. Skipping insert.')
+    finally:
+        session.close()
 
 
 def edit_category(initial_name: str, needed_name:str):
