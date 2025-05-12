@@ -1,14 +1,16 @@
-import pytest, os, subprocess
+import pytest
+from os import getenv
+from subprocess import run
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
 
 def test_install():
-    subprocess.run(["/home/ejlectron/Programming/projects/expense-tracker/install_scripts/install_ubuntu.sh"], shell=True)
+    run(["/home/ejlectron/Programming/projects/expense-tracker/install_scripts/install_ubuntu.sh"], shell=True)
 
     try:
         load_dotenv()
-        SQL_MYKOLA_PASSWORD = os.getenv('SQL_MYKOLA_PASSWORD')
+        SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
 
         engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
     except Exception as e:

@@ -1,8 +1,13 @@
-import os
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import IntegrityError
+from os import getenv
 from dotenv import load_dotenv
 from datetime import datetime
+
+from sqlalchemy import (
+    Column, Integer, String, DateTime, ForeignKey,
+    create_engine, text, func
+)
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import relationship, DeclarativeBase
 
 from expense_tracker.services.logger import get_custom_logger
 
@@ -11,9 +16,26 @@ logging = get_custom_logger()
 
 load_dotenv()
 
-SQL_MYKOLA_PASSWORD = os.getenv('SQL_MYKOLA_PASSWORD')
+SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
 
 engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
+
+
+class Expense(DeclarativeBase):
+    __tablename__ = 'EXPENSES'
+
+    id = Column('ID', Integer, primary_key=True, autoincrement=True, unique=True)
+    title = Column('TITLE', String(20), nullable=False)
+    amount = Column('AMOUNT', Integer, nullable=False)
+    time_of_transaction = Column('TIME_OF_TRANSACTION', DateTime, nullable=False, default=func.now())
+    category = Column('CATEGORY', String(50), ForeignKey('CATEGORIES.NAME', onupdate="CASCADE", ondelete="SET DEFAULT"), nullable=False)
+    description = Column('DESCRIPTION', String(511))
+
+    category_obj = relationship('Category', back_populates='expenses')
+
+    def __repr__(self):
+        return f"<Expense(title='{self.title}', amount={self.amount}, category='{self.category}')>"
+
 
 
 def add_expense(**kwargs):
@@ -29,7 +51,7 @@ def add_expense(**kwargs):
 
     with engine.connect() as connection:
         try:
-            query = text(f'INSERT INTO EXPENSES (TITLE, AMOUNT, TIME_OF_TRANSACTION, CATEGORY, DESCRIPTION) VALUES ' + \
+            query = text('INSERT INTO EXPENSES (TITLE, AMOUNT, TIME_OF_TRANSACTION, CATEGORY, DESCRIPTION) VALUES ' + \
                         f'("{kwargs["name"]}", {kwargs["amount"]}, "{str(datetime.now().strftime('%Y-%m-%d'))}", ' + \
                         f'"{category}", "{description}")')
             connection.execute(query)
@@ -67,9 +89,9 @@ def edit_expense(**kwargs):
     query, is_any_key_params = 'UPDATE EXPENSES SET', False
 
     for el in kwargs:
-        if kwargs[el] != None and el != "searched_id":
+        if kwargs[el] is not None and el != "searched_id":
             is_any_key_params = True
-            if type(kwargs[el] == str):
+            if type(kwargs[el] is str):
                 query += f' {el.upper()} = \'{kwargs[el]}\','
             else:
                 query += f' {el.upper()} = {kwargs[el]},'
@@ -100,14 +122,14 @@ def delete_expense(**kwargs):
     """
     query, is_any_key_params = "DELETE FROM EXPENSES WHERE", False
 
-    if kwargs['amount'] != None:
+    if kwargs['amount'] is not None:
         assert kwargs['amount'] > 0, "Input error: amount should be more than 0"
 
     for index, el in enumerate(kwargs):
-        if kwargs[el] != None: # checks if element was given by user
+        if kwargs[el] is not None: # checks if element was given by user
             is_any_key_params = True
             try:
-                if type(kwargs[el] == str):
+                if type(kwargs[el] is str):
                     query += f' {el.upper()}=\'{kwargs[el]}\' AND' # adds key param to query
                 else:
                     query += f' {el.upper()}={kwargs[el]} AND'

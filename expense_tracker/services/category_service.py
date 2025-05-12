@@ -1,28 +1,34 @@
-import os
-from sqlalchemy import create_engine, text, Column, String
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy.ext.declarative import declarative_base
+from os import getenv
 from dotenv import load_dotenv
+
+from sqlalchemy import (
+    Column, String, Integer,
+    create_engine
+)
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, relationship
+from sqlalchemy.exc import NoResultFound
 
 from expense_tracker.services.logger import get_custom_logger
 
 
-logging = get_custom_logger()
-
 load_dotenv()
-
-SQL_MYKOLA_PASSWORD = os.getenv('SQL_MYKOLA_PASSWORD')
+SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
 
 engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
-Session = sessionmaker(bind=engine)
 
-Base = declarative_base()
+logging, Session = get_custom_logger(), sessionmaker(bind=engine)
 
 
-class Category:
+class Category(DeclarativeBase):
     __tablename__ = 'CATEGORIES'
-    name = Column(String, primary_key=True)
+
+    id = Column('ID', Integer, primary_key=True, autoincrement=True, unique=True)
+    name = Column('NAME', String(50), nullable=False, unique=True, default='MISCELLANEOUS')
+
+    expenses = relationship('Expense', back_populates='category_obj', cascade="all, delete", passive_deletes=True)
+
+    def __repr__(self):
+        return f"<Category(name='{self.name}')>"
 
 
 def view_categories():
