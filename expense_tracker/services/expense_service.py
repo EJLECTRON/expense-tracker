@@ -5,56 +5,101 @@ from datetime import datetime
 from sqlalchemy import (
     create_engine, text
 )
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
+from sqlalchemy.orm import sessionmaker
+from expense_tracker.services import Category, Expense
 from expense_tracker.services.logger import get_custom_logger
 
 
-logging = get_custom_logger()
-
 load_dotenv()
-
 SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
-
 engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
+
+logging, Session = get_custom_logger(), sessionmaker(bind=engine)
+
+
+def view_expenses(**kwargs):
+    """
+    Keyword arguments:
+        - amount (positive int, optional): Number of records to fetch (default: 7)
+        - category (str, optional): Filter by category if provided
+    """
+    amount = kwargs.get("amount", 7)
+    category = kwargs.get("category")
+    
+    if category: category = category.upper()
+
+    assert isinstance(amount, int) and amount > 0, "Input error: amount must be a positive integer"
+
+    session = Session()
+    
+    try:
+        query = session.query(Expense)
+
+        if category:
+            category = category.upper()
+            query = query.filter(Expense.category == category)
+
+        results = query.limit(amount).all()
+
+        logging.info("All requested expenses are listed here:")
+        for expense in results:
+            print(expense)
+    finally:
+        session.close()
 
 
 def add_expense(**kwargs):
     """
     Keyword arguments:
         - name (str, required): Name of the record.
-        - amount (float, required): Amount of the record (pieces, grams, mililiters, etc.).
-        - category (str, required): category of the record from CATEGORIES table.
+        - amount (float, required): Amount of the record (pieces, grams, milliliters, etc.).
+        - category (str, required): Category of the record from CATEGORIES table.
         - description (str, optional): Description of the record. Defaults to ''.
     """
-    category = kwargs.get("category").upper()
+    name = kwargs.get("name")
+    amount = kwargs.get("amount")
+    category = kwargs.get("category")
     description = kwargs.get("description", "")
 
-    with engine.connect() as connection:
-        try:
-            query = text('INSERT INTO EXPENSES (TITLE, AMOUNT, TIME_OF_TRANSACTION, CATEGORY, DESCRIPTION) VALUES ' + \
-                        f'("{kwargs["name"]}", {kwargs["amount"]}, "{str(datetime.now().strftime('%Y-%m-%d'))}", ' + \
-                        f'"{category}", "{description}")')
-            connection.execute(query)
-            connection.commit()
-        except IntegrityError:
-            logging.error(f'There is no such category as {category}, please view list of available categories using show-categories')
+    assert name and isinstance(name, str), "Missing or invalid 'name'"
+    assert isinstance(amount, (int, float)) and amount > 0, "'amount' must be a positive number"
+    assert category and isinstance(category, str), "Missing or invalid 'category'"
 
-def view_expenses(**kwargs):
-    """
-    Keyword arguments:
-        - amount (positive float, optional): Amount of the record/s user wants (default: 7)
-        - category (str, required): Category of the record/s user wants
-    """
-    category = kwargs.get("category").upper()
-    amount = kwargs.get("amount", 7)
+    category = category.upper()
 
-    assert amount > 0, "Input error: amount should be more than 0"
+    session = Session()
 
-    with engine.connect() as connection:
-        query = text(f'SELECT * FROM EXPENSES WHERE CATEGORY=\'{category}\' LIMIT {amount}')
-        output = connection.execute(query)
-        print(output.fetchall())
+    try:
+        existing_category = session.query(Category).filter_by(name=category).one() #raises NoResultFound if it not found
+
+        new_expense = Expense(
+            title=name,
+            amount=amount,
+            time_of_transaction=datetime.now(),
+            category=category,
+            description=description
+        )
+
+        session.add(new_expense)
+        session.commit()
+        logging.info(f"Expense '{name}' has been successfully added under category '{category}'.")
+
+    except NoResultFound:
+        logging.error(
+            f"No such category '{category}' found. Use 'view_categories()' to list available categories."
+        )
+        session.rollback()
+
+    except IntegrityError as e:
+        logging.error(f"Database integrity error occurred: {str(e)}")
+        session.rollback()
+
+    finally:
+        session.close()
+
+
 
 #TODO case when name is more than 1 word isn't counted
 def edit_expense(**kwargs):

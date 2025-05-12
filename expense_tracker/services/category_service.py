@@ -14,17 +14,16 @@ from expense_tracker.services.logger import get_custom_logger
 
 load_dotenv()
 SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
-
 engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
 
 logging, Session = get_custom_logger(), sessionmaker(bind=engine)
 
 
 def view_categories():
-    logging.info("All categories listed here:")
     session = Session()
     try:
         categories = session.query(Category).all()
+        logging.info("All categories listed here:")
         for category in categories:
             print(category.name)
     finally:
