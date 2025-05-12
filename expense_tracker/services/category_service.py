@@ -2,12 +2,13 @@ from os import getenv
 from dotenv import load_dotenv
 
 from sqlalchemy import (
-    Column, String, Integer,
+    Column, String,
     create_engine
 )
-from sqlalchemy.orm import sessionmaker, DeclarativeBase, relationship
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound
 
+from expense_tracker.services import Category
 from expense_tracker.services.logger import get_custom_logger
 
 
@@ -17,18 +18,6 @@ SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
 engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
 
 logging, Session = get_custom_logger(), sessionmaker(bind=engine)
-
-
-class Category(DeclarativeBase):
-    __tablename__ = 'CATEGORIES'
-
-    id = Column('ID', Integer, primary_key=True, autoincrement=True, unique=True)
-    name = Column('NAME', String(50), nullable=False, unique=True, default='MISCELLANEOUS')
-
-    expenses = relationship('Expense', back_populates='category_obj', cascade="all, delete", passive_deletes=True)
-
-    def __repr__(self):
-        return f"<Category(name='{self.name}')>"
 
 
 def view_categories():
@@ -49,7 +38,7 @@ def add_category(name: str):
         exists = session.query(Category).filter_by(name=name).first()
         if not exists:
             new_category = Category()
-            new_category.name = Column(name, primary_key=True)
+            new_category.name = name
 
             session.add(new_category)
             session.commit()
@@ -68,7 +57,7 @@ def edit_category(initial_name: str, needed_name:str):
 
     try:
         category = session.query(Category).filter_by(name=initial_name).one()
-        category.name = Column(needed_name, primary_key=True)
+        category.name = needed_name
 
         session.commit()
         session.refresh(category)

@@ -1,9 +1,6 @@
 import pytest
 from os import getenv
-from sqlalchemy import (
-    Column, Integer, String, DateTime, ForeignKey,
-    Text, create_engine, func
-)
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 from expense_tracker.services.category_service import view_categories, add_category, edit_category, delete_category

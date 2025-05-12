@@ -3,11 +3,9 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 from sqlalchemy import (
-    Column, Integer, String, DateTime, ForeignKey,
-    create_engine, text, func
+    create_engine, text
 )
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import relationship, DeclarativeBase
 
 from expense_tracker.services.logger import get_custom_logger
 
@@ -19,23 +17,6 @@ load_dotenv()
 SQL_MYKOLA_PASSWORD = getenv('SQL_MYKOLA_PASSWORD')
 
 engine = create_engine(f'mysql+mysqlconnector://mykola:{SQL_MYKOLA_PASSWORD}@localhost/EXPENSE_TRACKER?charset=utf8mb4&collation=utf8mb4_general_ci')
-
-
-class Expense(DeclarativeBase):
-    __tablename__ = 'EXPENSES'
-
-    id = Column('ID', Integer, primary_key=True, autoincrement=True, unique=True)
-    title = Column('TITLE', String(20), nullable=False)
-    amount = Column('AMOUNT', Integer, nullable=False)
-    time_of_transaction = Column('TIME_OF_TRANSACTION', DateTime, nullable=False, default=func.now())
-    category = Column('CATEGORY', String(50), ForeignKey('CATEGORIES.NAME', onupdate="CASCADE", ondelete="SET DEFAULT"), nullable=False)
-    description = Column('DESCRIPTION', String(511))
-
-    category_obj = relationship('Category', back_populates='expenses')
-
-    def __repr__(self):
-        return f"<Expense(title='{self.title}', amount={self.amount}, category='{self.category}')>"
-
 
 
 def add_expense(**kwargs):
