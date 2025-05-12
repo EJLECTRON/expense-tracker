@@ -2,7 +2,6 @@ from os import getenv
 from dotenv import load_dotenv
 
 from sqlalchemy import (
-    Column, String,
     create_engine
 )
 from sqlalchemy.orm import sessionmaker

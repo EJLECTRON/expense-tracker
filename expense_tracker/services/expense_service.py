@@ -28,7 +28,7 @@ def view_expenses(**kwargs):
     amount = kwargs.get("amount", 7)
     category = kwargs.get("category")
     
-    if category: category = category.upper()
+    category = category.upper() if category else None
 
     assert isinstance(amount, int) and amount > 0, "Input error: amount must be a positive integer"
 
@@ -72,7 +72,7 @@ def add_expense(**kwargs):
     session = Session()
 
     try:
-        existing_category = session.query(Category).filter_by(name=category).one() #raises NoResultFound if it not found
+        session.query(Category).filter_by(name=category).one() #raises NoResultFound if it not found
 
         new_expense = Expense(
             title=name,
