@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 from sqlalchemy import (
-    create_engine, text
+    create_engine
 )
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
@@ -27,8 +27,9 @@ def view_expenses(**kwargs):
     """
     amount = kwargs.get("amount", 7)
     category = kwargs.get("category")
-    
-    category = category.upper() if category else None
+
+    if category is not None:
+        category = category.upper()
 
     assert isinstance(amount, int) and amount > 0, "Input error: amount must be a positive integer"
 
@@ -38,7 +39,6 @@ def view_expenses(**kwargs):
         query = session.query(Expense)
 
         if category:
-            category = category.upper()
             query = query.filter(Expense.category == category)
 
         results = query.limit(amount).all()
@@ -46,6 +46,11 @@ def view_expenses(**kwargs):
         logging.info("All requested expenses are listed here:")
         for expense in results:
             print(expense)
+
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while deleting expense. Error:{e}")
+        session.rollback()
+
     finally:
         session.close()
 
@@ -63,9 +68,9 @@ def add_expense(**kwargs):
     category = kwargs.get("category")
     description = kwargs.get("description", "")
 
-    assert name and isinstance(name, str), "Missing or invalid 'name'"
-    assert isinstance(amount, (int, float)) and amount > 0, "'amount' must be a positive number"
-    assert category and isinstance(category, str), "Missing or invalid 'category'"
+    assert name and isinstance(name, str), logging.error("Missing or invalid 'name'")
+    assert isinstance(amount, (int, float)) and amount > 0, logging.error("'amount' must be a positive number")
+    assert category and isinstance(category, str), logging.error("Missing or invalid 'category'")
 
     category = category.upper()
 
@@ -96,79 +101,121 @@ def add_expense(**kwargs):
         logging.error(f"Database integrity error occurred: {str(e)}")
         session.rollback()
 
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while adding expense. Error:{e}")
+        session.rollback()
+
     finally:
         session.close()
 
 
-
-#TODO case when name is more than 1 word isn't counted
 def edit_expense(**kwargs):
     """
-    Edit expense (search for a record available only using id)
+    Edit expense (search for a record using its ID).
+
     Keyword arguments:
-        - searched_id (str, required): Id of the record to update.
-        - title (str, optional): New name of the record (default: (default: "")
-        - amount (positive float, optional): New amount of the record (default: 0.0)
-        - category (str, optional): New category of the record (default: "")
-        - description (str, optional): New description of the record (default: "")
+        - title (str, required): Title that represents record to edit.
+        - new_title (str, optional): New name of the record.
+        - amount (positive float, optional): New amount of the record.
+        - category (str, optional): New category (must exist in CATEGORIES).
+        - description (str, optional): New description.
     """
-    query, is_any_key_params = 'UPDATE EXPENSES SET', False
+    title = kwargs.get("title")
+    new_title = kwargs.get("new_title")
+    amount = kwargs.get("amount")
+    category = kwargs.get("category")
+    description = kwargs.get("description")
+    
+    if title is not None:
+        assert isinstance(title, str), logging.error("'title' must be a string")
 
-    for el in kwargs:
-        if kwargs[el] is not None and el != "searched_id":
-            is_any_key_params = True
-            if type(kwargs[el] is str):
-                query += f' {el.upper()} = \'{kwargs[el]}\','
-            else:
-                query += f' {el.upper()} = {kwargs[el]},'
+    if new_title is not None:
+        assert isinstance(new_title, str), logging.error("'new_title' must be a string")
 
-    if is_any_key_params:
-        query = query[:-1]
-        query += f' WHERE ID = {kwargs["searched_id"]};'
+    if category is not None:
+        assert isinstance(category, str), logging.error("'category' must be a string")
+        category = category.upper()
 
-        with engine.connect() as connection:
-            query = text(query)
-            connection.execute(query)
-            connection.commit()
-        logging.info("Updated successfully.")
-    else:
-        logging.error("None parameters were given, try again.")
+    if amount is not None:
+        assert isinstance(amount, (int, float)) and amount > 0, logging.error("'amount' must be a positive number")
+    
+    if description is not None:
+        assert isinstance(description, str), logging.error("'description' must be a string")
+
+    session = Session()
+
+    try:
+        expense = session.query(Expense).filter_by(title=title).one()
+
+        if new_title is not None:
+            expense.title = new_title
+
+        if amount is not None:
+            expense.amount = amount
+
+        if category is not None:
+            try:
+                session.query(Category).filter_by(name=category).one() # Validate that the new category exists
+            except NoResultFound:
+                logging.error(f"No category found for category '{category}'")
+            expense.category = category
+
+        if description is not None:
+            expense.description = description
+
+        session.commit()
+        logging.info(f"Expense with title {title} has been updated successfully.")
+
+    except NoResultFound:
+        logging.error(f"No expense found for title '{title}'.")
+        session.rollback()
+
+    except IntegrityError as e:
+        logging.error(f"Database integrity error occurred: {str(e)}")
+        session.rollback()
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while editing expense. Error:{e}")
+        session.rollback()
+
+    finally:
+        session.close()
 
 
-#TODO case when name is more than 1 word isn't counted
 def delete_expense(**kwargs):
     """
+    Delete an expense by title.
+
     Keyword arguments:
-        - id (int, optional): Id of the record (default. (default: 0; non-existent value in database).
-        - title (str, optional): Name of the record/s (default. (default: "")
-        - amount (positive float, optional): Amount of the record/s (default: 0.0)
-        - time_of_transaction (str, optional): Time of the record/s (default: "")
-        - category (str, optional): Category of the record/s (default: "")
-        - description (str, optional): Description of the record/s (default: "")
+        - title (str, required): Title of the record to be deleted.
     """
-    query, is_any_key_params = "DELETE FROM EXPENSES WHERE", False
+    title = kwargs.get("title")
 
-    if kwargs['amount'] is not None:
-        assert kwargs['amount'] > 0, "Input error: amount should be more than 0"
+    if title is None:
+        logging.error("'title' is required to delete an expense.")
+        return
 
-    for index, el in enumerate(kwargs):
-        if kwargs[el] is not None: # checks if element was given by user
-            is_any_key_params = True
-            try:
-                if type(kwargs[el] is str):
-                    query += f' {el.upper()}=\'{kwargs[el]}\' AND' # adds key param to query
-                else:
-                    query += f' {el.upper()}={kwargs[el]} AND'
-            except NameError:
-                pass
+    assert isinstance(title, str), logging.error("'title' must be a string")
 
-    query = query[:len(query) - 3] + ';' # join semicolon to the end of query
+    session = Session()
 
-    if is_any_key_params:
-        with engine.connect() as connection:
-            query = text(query)
-            connection.execute(query)
-            connection.commit()
-        logging.info("Deleted successfully.")
-    else:
-        logging.error("None parameters were given, try again.")
+    try:
+        expense = session.query(Expense).filter_by(title=title).one()
+        session.delete(expense)
+        session.commit()
+        logging.info(f"Expense with title '{title}' has been deleted successfully.")
+
+    except NoResultFound:
+        logging.error(f"No expense found for title '{title}'.")
+        session.rollback()
+
+    except IntegrityError as e:
+        logging.error(f"Database integrity error occurred during deletion: {str(e)}")
+        session.rollback()
+
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while deleting expense. Error:{e}")
+        session.rollback()
+
+    finally:
+        session.close()
