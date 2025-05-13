@@ -12,7 +12,7 @@ def main():
     view_categories_parser = subparsers.add_parser('view-categories')
 
     add_category_parser = subparsers.add_parser('add-category')
-    add_category_parser.add_argument('--name', type=str, required=True, help='Categoty name')
+    add_category_parser.add_argument('--name', type=str, required=True, help='Category name')
 
     edit_category_parser = subparsers.add_parser('edit-category')
     edit_category_parser.add_argument('--initial_name', type=str, required=True, help='Categoty name you want to rename')
@@ -28,7 +28,7 @@ def main():
     add_expense_parser.add_argument('--description', type=str, required=False, help='Full description')
 
     view_expenses_parser = subparsers.add_parser('view-expenses')
-    view_expenses_parser.add_argument('--amount', type=int, required=True, help='View last n expenses')
+    view_expenses_parser.add_argument('--amount', type=int, required=False, help='View last n expenses')
     view_expenses_parser.add_argument('--category', type=str, required=False, help='To discover all available categories use command: \n view categories')
 
 

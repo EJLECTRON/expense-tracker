@@ -25,11 +25,14 @@ def view_expenses(**kwargs):
         - amount (positive int, optional): Number of records to fetch (default: 7)
         - category (str, optional): Filter by category if provided
     """
-    amount = kwargs.get("amount", 7)
+    amount = kwargs.get("amount")
     category = kwargs.get("category")
 
     if category is not None:
         category = category.upper()
+    
+    if amount is None:
+        amount = 7
 
     assert isinstance(amount, int) and amount > 0, "Input error: amount must be a positive integer"
 
@@ -157,7 +160,10 @@ def edit_expense(**kwargs):
             try:
                 session.query(Category).filter_by(name=category).one() # Validate that the new category exists
             except NoResultFound:
-                logging.error(f"No category found for category '{category}'")
+                logging.error(
+                    f"No such category '{category}' found. Use 'view_categories' to list available categories."
+                )
+                session.rollback()
             expense.category = category
 
         if description is not None:
@@ -167,7 +173,9 @@ def edit_expense(**kwargs):
         logging.info(f"Expense with title {title} has been updated successfully.")
 
     except NoResultFound:
-        logging.error(f"No expense found for title '{title}'.")
+        logging.error(
+            f"No such record with title '{title}' found. Use 'view_expenses' to list available expenses."
+        )
         session.rollback()
 
     except IntegrityError as e:
@@ -206,7 +214,9 @@ def delete_expense(**kwargs):
         logging.info(f"Expense with title '{title}' has been deleted successfully.")
 
     except NoResultFound:
-        logging.error(f"No expense found for title '{title}'.")
+        logging.error(
+            f"No such record with title '{title}' found. Use 'view_expenses' to list available expenses."
+        )
         session.rollback()
 
     except IntegrityError as e:
